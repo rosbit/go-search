@@ -1,0 +1,8 @@
+{
+    "listen-host": "",
+    "listen-port": 7080,
+    "worker-num": 5,
+    "timeout": 0,
+    "root-dir": "./schema-home"
+}
+
