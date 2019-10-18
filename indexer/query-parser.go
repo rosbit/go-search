@@ -42,13 +42,13 @@ func parseQuery(q, fq, s, f, page, pagesize, fl string) (*parsedQuery, error) {
 	}
 
 	return &parsedQuery{
-		query: qRes,
-		labels: qLabels,
+		query:   qRes,
+		labels:  qLabels,
 		fquerys: fqRes,
 		sortBys: sRes,
 		filters: fRes,
-		start: nStart,
-		rows: nRows,
+		start:   nStart,
+		rows:    nRows,
 		outFieldList: flRes,
 	}, nil
 }
@@ -162,15 +162,15 @@ func parseF(f string) ([]filter, error) {
 		fRes := filter{fieldName: f[:pos], conds:[]interface{}{}, ranges:[]range_{}}
 		conds := fieldsKeepQuote(f[pos+1:], ',')
 		for _, cond := range conds {
+			if len(cond) == 0 {
+				continue
+			}
 			pos := strings.Index(cond, "~")
 			if pos >= 0 {
 				// range
-				if len(cond) == 0 {
-					continue
-				}
 				fRes.ranges = append(fRes.ranges, range_{
-					from:cond[:pos],
-					to:cond[pos+1:],
+					from: cond[:pos],
+					to:   cond[pos+1:],
 				})
 			} else {
 				// filter
