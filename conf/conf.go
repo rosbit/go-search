@@ -11,6 +11,7 @@
 //	"worker-num": 5,
 //	"timeout": 0,
 //	"root-dir": "/path/to/root",
+//	"lru-minutes": 1,
 //	"seg-dict" {
 //		"dict-file": "/path/to/dict-file",
 //		"stop-file": "/path/to/stopword-file"
@@ -35,6 +36,7 @@ var (
 		WorkerNum  int    `json:"worker-num"`
 		Timeout    int    `json:"timeout"`
 		RootDir    string `json:"root-dir"`
+		LruMinutes int    `json:"lru-minutes"`
 		SegDict struct {
 			DictFile   string `json:"dict-file"`
 			StopFile   string `json:"stop-file"`
@@ -44,7 +46,16 @@ var (
 	// 缺省时区，会被环境变量TZ覆盖
 	Loc = time.FixedZone("UTC+8", 8*60*60)
 
-	UseStore bool
+	UseStore string
+
+	validStore = map[string]string{
+		"bg": "bg",
+		"badger": "bg",
+		"ldb": "ldb",
+		"leveldb": "ldb",
+		"bolt": "bolt",
+	}
+	defaultStore = "ldb"
 )
 
 func getEnv(name string, result *string, must bool) error {
@@ -70,7 +81,11 @@ func CheckGlobalConf() error {
 
 	getEnv("USE_STORE", &p, false)
 	if p != "" {
-		UseStore = true
+		if db, ok := validStore[p]; ok {
+			UseStore = db
+		} else {
+			UseStore = defaultStore
+		}
 	}
 
 	var confFile string
@@ -90,6 +105,10 @@ func CheckGlobalConf() error {
 
 	if err = checkMust(); err != nil {
 		return err
+	}
+
+	if ServiceConf.LruMinutes <= 0 {
+		ServiceConf.LruMinutes = 10
 	}
 
 	return nil

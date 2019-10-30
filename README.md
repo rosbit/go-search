@@ -27,6 +27,7 @@ $ make
             "listen-port": 7080,
             "worker-num": 5,
             "timeout": 0,
+            "lru-minutes": 10,          // 至少超过n分钟没访问的索引会从内存清除
             "root-dir": "./schema-home" // 索引配置文件根路径
         }
         ```
@@ -35,6 +36,9 @@ $ make
 
         - CONF_FILE: 指明配置文件路径
         - USE_STORE: 是否持久化保存索引数据，不指明则索引只保存在内存中，速度快，重启就丢失
+             - bg/badger       使用badger持久化，速度较慢
+             - ldb/leveldb     使用leveldb持久化，缺省使用，速度快
+             - bolt            使用boltdb持久化
         - TZ:  时区，如Asia/Shanghai，缺省时区东8区，对于时间类型的转换保存很重要
 
 1. 运行服务

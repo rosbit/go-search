@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"encoding/gob"
+	"time"
 )
 
 // 初始化/获取索引库
@@ -16,6 +17,8 @@ func initIndexer(index string) (*indexer, error) {
 	indexerLock.RUnlock()
 
 	if ok {
+		log.Printf("[LRU] index %s (existing) added to LRU\n", index)
+		lruAdd(index)
 		return idx, nil
 	}
 
@@ -28,7 +31,7 @@ func initIndexer(index string) (*indexer, error) {
 	engine := &riot.Engine{}
 	idx = &indexer{schema:schema, engine:engine}
 	initOpts := types.EngineOpts{
-		UseStore:    conf.UseStore,
+		UseStore:    len(conf.UseStore) > 0,
 		NotUseGse:   true,
 		/*
 		StoreEngine: "bg",
@@ -39,8 +42,8 @@ func initIndexer(index string) (*indexer, error) {
 		//	IndexType: types.LocsIndex,
 		//},
 	}
-	if conf.UseStore {
-		initOpts.StoreEngine = "bg"
+	if len(conf.UseStore) > 0 {
+		initOpts.StoreEngine = conf.UseStore
 		initOpts.StoreFolder = schema.StorePath
 		initOpts.NumShards   = int(schema.Shards)
 	}
@@ -54,6 +57,8 @@ func initIndexer(index string) (*indexer, error) {
 	//}
 	engine.Init(initOpts)
 	engine.Flush()
+	log.Printf("[LRU] index %s (new) added to LRU\n", index)
+	lruAdd(index)
 
 	indexerLock.Lock()
 	defer indexerLock.Unlock()
@@ -99,6 +104,7 @@ var (
 	indexerChan chan *indexerOp
 	stopChan chan struct{}
 	running bool
+	lruTicker *time.Ticker
 )
 
 func StartIndexers(workNum int) {
@@ -108,6 +114,9 @@ func StartIndexers(workNum int) {
 	for i:=0; i<workNum; i++ {
 		go opThread(i)
 	}
+
+	lruTicker = time.NewTicker(time.Duration(conf.ServiceConf.LruMinutes) * time.Minute)
+	go lruThread()
 }
 
 func IsRunning() bool {
@@ -121,6 +130,7 @@ func StopIndexers(workNum int) {
 
 	running = false
 	close(indexerChan)
+	lruTicker.Stop()
 
 	for i:=0; i<workNum; i++ {
 		<-stopChan
@@ -148,3 +158,13 @@ func opThread(workNo int) {
 	stopChan <-struct{}{}
 }
 
+func lruThread() {
+	timespan := time.Duration(conf.ServiceConf.LruMinutes) * time.Minute
+	for now := range lruTicker.C {
+		indexes := lruGet(now.Add(-timespan))
+		for index := range indexes {
+			RemoveIndexer(index)
+			log.Printf("[LRU] index %s will be closed\n", index)
+		}
+	}
+}
