@@ -44,7 +44,7 @@ $ make
 1. 运行服务
 
       ```bash
-      $ CONF_FILE=./sample.conf.json TZ=Asia/Shanghai ./go-search
+      $ CONF_FILE=./sample.conf.json USE_STORE=ldb TZ=Asia/Shanghai ./go-search
       ```
 
 

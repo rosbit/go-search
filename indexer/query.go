@@ -552,7 +552,7 @@ func (idx *indexer) outputResult(searchResp *types.SearchResp, pq *parsedQuery) 
 		PageSize: pq.rows,
 	}
 	timeout = searchResp.Timeout
-	pagination = p
+	pagination = &p
 
 	if searchResp.Docs == nil {
 		return
