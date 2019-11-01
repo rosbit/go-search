@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 )
 
-// GET /search/:index?q=+xxx -xxx xxx&s=f1:desc,f2:asc&page=xx&pagesize=xx&f=f1:xxx,r1~r2;f2:r1~r2&fq=f:q-in-field&fl=f1,f2
+// GET /search/:index?q=+xxx -xxx xxx&s=f1:desc,f2:asc&page=xx&pagesize=xx&f=f1:xxx,r1~r2;f2:r1~r2&fq=f:q-in-field&fl=f1,f2&pretty
 //
 // 搜索、过滤、排序、输出字段
 //
@@ -21,6 +22,7 @@ import (
 //  page: 页码，从1开始
 //  pagesize: 每页条数，最大100
 //  fl: 输出字段列表，多个字段名用','分割
+//  pretty: 是否美化输出结果，如果没有该参数，则紧凑输出
 //
 // 返回结果:
 // {
@@ -53,6 +55,7 @@ func Search(c *helper.Context) {
 	page := c.QueryParam("page")
 	pagesize  := c.QueryParam("pagesize")
 	fl := c.QueryParam("fl")
+	_, pretty := c.QueryParams()["pretty"]
 
 	pagination, timeout, docs, err := indexer.Query(index, q, fq, s, f, page, pagesize, fl)
 	if err != nil {
@@ -63,7 +66,11 @@ func Search(c *helper.Context) {
 	w := c.Response()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	outputJSONDocByDoc(w, pagination, timeout, docs)
+	if !pretty {
+		outputJSONDocByDoc(w, pagination, timeout, docs)
+	} else {
+		prettyOutputJSONDocByDoc(w, pagination, timeout, docs)
+	}
 }
 
 func outputJSONDocByDoc(w http.ResponseWriter, pagination interface{}, timeout bool, docs <-chan interface{}) {
@@ -92,4 +99,46 @@ func outputJSONDocByDoc(w http.ResponseWriter, pagination interface{}, timeout b
 		fmt.Fprintf(w, "]")
 	}
 	fmt.Fprintf(w, "}}")
+}
+
+func prettyOutputJSONDocByDoc(w http.ResponseWriter, pagination interface{}, timeout bool, docs <-chan interface{}) {
+	fmt.Fprintf(w,
+`{
+  "code": %d,
+  "msg": "OK",
+  "result": {
+    "timeout": %v,
+    "pagination": `, http.StatusOK, timeout)
+
+	b, _ := json.MarshalIndent(pagination, "    ", "    ")
+	w.Write(b)
+
+	io.WriteString(w, `,
+    "docs": `)
+
+	count := 0
+	if docs != nil {
+		for doc := range docs {
+			if count == 0 {
+				io.WriteString(w, "[\n      ")
+			} else {
+				io.WriteString(w, ",\n      ")
+			}
+
+			b, _ = json.MarshalIndent(doc, "      ", "    ")
+			w.Write(b)
+			count += 1
+		}
+	}
+
+	if count == 0 {
+		io.WriteString(w, "null")
+	} else {
+		fmt.Fprintf(w, "\n    ]")
+	}
+
+	fmt.Fprintf(w, `
+  }
+}
+`   )
 }
