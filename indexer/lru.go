@@ -36,6 +36,15 @@ func lruAdd(index string) {
 	lruAccess.Add(index, time.Now())
 }
 
+// used for renmaing
+func LruRemove(index string) {
+	lruAccess.Remove(index)
+
+	tooOldLock.Lock()
+	delete(tooOldIndex, index)
+	tooOldLock.Unlock()
+}
+
 func lruGet(timeLimit time.Time) (chan string) {
 	res := make(chan string)
 

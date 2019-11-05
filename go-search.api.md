@@ -96,6 +96,17 @@
 
 
 
+### 1.4 schema改名
+
+- URI: /schema/:index/:newIndex
+- 方法: PUT
+- 路径参数
+  - :index 要改名的索引库名
+  - :newIndex 新的索引库名
+- 功能: 如果:index存在，将被改名为:newIndex
+
+
+
 ## 二、索引增删改
 
 说明：

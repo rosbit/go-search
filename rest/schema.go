@@ -87,3 +87,36 @@ func ShowSchema(c *helper.Context) {
 		c.JSON(http.StatusOK, schema.SchemaConf)
 	}
 }
+
+// PUT /schema/:index/:newIndex
+//
+// Rename schema name
+//
+// path parameter
+//  - index     name of existing index
+//  - newIndex  new name of the index
+func RenameSchema(c *helper.Context) {
+	index := c.Param("index")
+	newIndex := c.Param("newIndex")
+	if _, err := conf.LoadSchema(index); err != nil {
+		c.Error(http.StatusNotFound, fmt.Sprintf("index %s not found", index))
+		return
+	}
+	if _, err := conf.LoadSchema(newIndex); err == nil {
+		c.Error(http.StatusInternalServerError, fmt.Sprintf("index %s alreday exists", newIndex))
+		return
+	}
+
+	indexer.LruRemove(index)
+	indexer.RemoveIndexer(index)
+
+	if err := conf.RenameSchema(index, newIndex); err != nil {
+		c.Error(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"code": http.StatusOK,
+		"msg": fmt.Sprintf("index %s renamed to %s OK", index, newIndex),
+	})
+}

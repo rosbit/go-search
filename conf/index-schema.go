@@ -174,6 +174,15 @@ func DeleteSchema(index string) error {
 	return os.RemoveAll(d)
 }
 
+// 索引库改名
+//   index: 原索引名
+//   newIndex: 新索引名
+func RenameSchema(index, newIndex string) error {
+	d, _ := generateSchemaFile(index)
+	nd, _ := generateSchemaFile(newIndex)
+	return os.Rename(d, nd)
+}
+
 // 把日期、时间字段格式化输出
 func (field *Field) FormatDatetime(v interface{}) interface{} {
 	if v == nil {
