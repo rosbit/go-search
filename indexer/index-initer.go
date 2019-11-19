@@ -115,8 +115,10 @@ func StartIndexers(workNum int) {
 		go opThread(i)
 	}
 
-	lruTicker = time.NewTicker(time.Duration(conf.ServiceConf.LruMinutes) * time.Minute)
-	go lruThread()
+	if conf.ServiceConf.LruMinutes > 0 {
+		lruTicker = time.NewTicker(time.Duration(conf.ServiceConf.LruMinutes) * time.Minute)
+		go lruThread()
+	}
 }
 
 func IsRunning() bool {
@@ -130,7 +132,9 @@ func StopIndexers(workNum int) {
 
 	running = false
 	close(indexerChan)
-	lruTicker.Stop()
+	if conf.ServiceConf.LruMinutes > 0 {
+		lruTicker.Stop()
+	}
 
 	for i:=0; i<workNum; i++ {
 		<-stopChan

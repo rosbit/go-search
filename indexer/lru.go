@@ -2,6 +2,7 @@ package indexer
 
 import (
 	"github.com/hashicorp/golang-lru"
+	"go-search/conf"
 	"time"
 	"sync"
 	"log"
@@ -14,12 +15,18 @@ var (
 )
 
 func onEvict(key, value interface{}) {
+	if conf.ServiceConf.LruMinutes <= 0 {
+		return
+	}
 	tooOldLock.Lock()
 	tooOldIndex[key.(string)] = value.(time.Time)
 	tooOldLock.Unlock()
 }
 
 func init() {
+	if conf.ServiceConf.LruMinutes <= 0 {
+		return
+	}
 	c, err := lru.NewWithEvict(20, onEvict)
 	if err != nil {
 		log.Fatal("[LRU] failed to init LRU\n")
@@ -29,6 +36,9 @@ func init() {
 }
 
 func lruAdd(index string) {
+	if conf.ServiceConf.LruMinutes <= 0 {
+		return
+	}
 	tooOldLock.Lock()
 	delete(tooOldIndex, index)
 	tooOldLock.Unlock()
@@ -38,6 +48,9 @@ func lruAdd(index string) {
 
 // used for renmaing
 func LruRemove(index string) {
+	if conf.ServiceConf.LruMinutes <= 0 {
+		return
+	}
 	lruAccess.Remove(index)
 
 	tooOldLock.Lock()
@@ -46,6 +59,9 @@ func LruRemove(index string) {
 }
 
 func lruGet(timeLimit time.Time) (chan string) {
+	if conf.ServiceConf.LruMinutes <= 0 {
+		return nil
+	}
 	res := make(chan string)
 
 	go func() {

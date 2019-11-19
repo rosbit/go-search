@@ -36,7 +36,7 @@ var (
 		WorkerNum  int    `json:"worker-num"`
 		Timeout    int    `json:"timeout"`
 		RootDir    string `json:"root-dir"`
-		LruMinutes int    `json:"lru-minutes"`
+		LruMinutes int    `json:"lru-minutes"`  // 如果<=0，表示不需要LRU回收
 		SegDict struct {
 			DictFile   string `json:"dict-file"`
 			StopFile   string `json:"stop-file"`
@@ -105,10 +105,6 @@ func CheckGlobalConf() error {
 
 	if err = checkMust(); err != nil {
 		return err
-	}
-
-	if ServiceConf.LruMinutes <= 0 {
-		ServiceConf.LruMinutes = 10
 	}
 
 	return nil
