@@ -29,6 +29,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"reflect"
 )
 
 // 各种分词器
@@ -193,10 +194,9 @@ func (field *Field) FormatDatetime(v interface{}) interface{} {
 		return nil
 	}
 
-
 	switch field.Type {
 	case "date", "datetime", "time":
-		return time.Unix(0, nsec).Format(field.TimeFmt)
+		return time.Unix(0, nsec).In(Loc).Format(field.TimeFmt)
 	default:
 		return nil
 	}
@@ -300,6 +300,8 @@ func toInt(v interface{}) (int64, error) {
 			return 0, nil
 		}
 		return strconv.ParseInt(s, 10, 64)
+	case int8, int16, int32, int64, int:
+		return reflect.ValueOf(v).Int(), nil
 	default:
 		return 0, fmt.Errorf("can not convert %v to int64", v)
 	}
@@ -318,6 +320,8 @@ func toUint(v interface{}) (uint64, error) {
 			return 0, nil
 		}
 		return strconv.ParseUint(s, 10, 64)
+	case uint8, uint16, uint32, uint64, uint:
+		return reflect.ValueOf(v).Uint(), nil
 	default:
 		return 0, fmt.Errorf("can not convert %v to uint64", v)
 	}
@@ -330,6 +334,8 @@ func toFloat(v interface{}) (float64, error) {
 	switch v.(type) {
 	case float64:
 		return v.(float64), nil
+	case float32:
+		return float64(v.(float32)), nil
 	case string:
 		s := v.(string)
 		if s == "" {

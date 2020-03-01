@@ -29,6 +29,7 @@ func StartService() error {
 	api.PUT("/schema/:index/:newIndex", rest.RenameSchema)
 	api.PUT("/doc/:index",       rest.IndexDoc)
 	api.PUT("/docs/:index",      rest.IndexDocs)
+	api.PUT("/update/:index",    rest.UpdateDoc)
 	api.DELETE("/doc/:index",    rest.DeleteDoc)
 	api.DELETE("/docs/:index",   rest.DeleteDocs)
 	api.GET("/search/:index",    rest.Search)

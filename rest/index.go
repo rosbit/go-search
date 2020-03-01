@@ -16,6 +16,23 @@ import (
 //   ...
 // }
 func IndexDoc(c *helper.Context) {
+	updateDoc(c, indexer.IndexDoc, "doc added to index")
+}
+
+// PUT /update/:index
+//
+// update an existing document. there must be pk fields in the body.
+//
+// POST body:
+// {
+//   "field-name": "xxx",
+//   ...
+// }
+func UpdateDoc(c *helper.Context) {
+	updateDoc(c, indexer.UpdateDoc, "doc updated to index")
+}
+
+func updateDoc(c *helper.Context, fnUpdateDoc indexer.FnUpdateDoc, okStr string) {
 	index := c.Param("index")
 
 	var doc map[string]interface{}
@@ -23,14 +40,14 @@ func IndexDoc(c *helper.Context) {
 		c.Error(code, err.Error())
 		return
 	}
-	docId, err := indexer.IndexDoc(index, doc)
+	docId, err := fnUpdateDoc(index, doc)
 	if err != nil {
 		c.Error(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"code": http.StatusOK,
-		"msg": "doc added to index",
+		"msg": okStr,
 		"id": docId,
 	})
 }

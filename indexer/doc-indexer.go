@@ -15,6 +15,9 @@ import (
 // IndexJSON/IndexCSV/... 等从文件获取doc建索引的函数签名
 type FnIndexReader func(string,io.ReadCloser,...string)([]string,error)
 
+// IndexDoc/UpdateDoc: 更新一个doc
+type FnUpdateDoc func(index string, doc map[string]interface{}) (docId string, err error)
+
 // 把一个doc添加到索引库
 func IndexDoc(index string, doc map[string]interface{}) (docId string, err error) {
 	if !running {
@@ -27,6 +30,37 @@ func IndexDoc(index string, doc map[string]interface{}) (docId string, err error
 	}
 
 	docId, err = idx.indexDoc(doc)
+	if err != nil {
+		return "", err
+	}
+	idx.flush()
+	return docId, nil
+}
+
+// 更新一个doc，可以只更新出现的字段。如果doc不存在，更新会失败
+func UpdateDoc(index string, doc map[string]interface{}) (docId string, err error) {
+	if !running {
+		return "", fmt.Errorf("the service is stopped")
+	}
+
+	idx, err := initIndexer(index)
+	if err != nil {
+		return "", fmt.Errorf("schema %s not found, please create schema first", index)
+	}
+
+	existingDoc, err := idx.getDoc(doc)
+	if err != nil {
+		return "", err
+	}
+	fmt.Printf("exsiting doc: %v\n", existingDoc)
+	fmt.Printf("updating doc: %v\n", doc)
+
+	for k, v := range doc {
+		existingDoc[k] = v
+	}
+	fmt.Printf("new doc: %v\n", existingDoc)
+
+	docId, err = idx.indexDoc(existingDoc)
 	if err != nil {
 		return "", err
 	}
