@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"math"
 )
 
 // 根据参数完成实际的搜索查询
@@ -376,8 +377,12 @@ func (d StoredDoc) score(sortBys []sorting, bm25 int) []float32 {
 		}
 
 		output[i] = sortingScore(storedVal, bm25)
-		if sortBy.asc && output[i] != 0 {
-			output[i] = float32(1.0)/output[i]
+		if sortBy.asc {
+			if output[i] != 0 {
+				output[i] = float32(1.0)/output[i]
+			} else {
+				output[i] = math.MaxFloat32
+			}
 		}
 	}
 	return output
