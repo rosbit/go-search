@@ -1,14 +1,14 @@
 package rest
 
 import (
-	"github.com/rosbit/http-helper"
+	"github.com/rosbit/mgin"
 	"io"
 	"fmt"
 	"path"
 	"strings"
 )
 
-func getReader(c *helper.Context, multipartFileParam string) (in io.ReadCloser, contentType, ext string, err error) {
+func getReader(c *mgin.Context, multipartFileParam string) (in io.ReadCloser, contentType, ext string, err error) {
 	ct := strings.FieldsFunc(c.Header(HEADER_CONTENT_TYPE), func(ch rune)bool{
 		return ch == ' ' || ch == ';'
 	})

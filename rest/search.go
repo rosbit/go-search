@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/rosbit/http-helper"
+	"github.com/rosbit/mgin"
 	"go-search/indexer"
 	"net/http"
 	"encoding/json"
@@ -44,7 +44,7 @@ import (
 // }
 //
 // 注意: ';'必须进行url编码，net/url中';'和'&'的作用是一样的。
-func Search(c *helper.Context) {
+func Search(c *mgin.Context) {
 	log.Printf("[query] %s\n", c.Request().RequestURI)
 	index := c.Param("index")
 

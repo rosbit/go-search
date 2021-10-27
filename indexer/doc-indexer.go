@@ -2,7 +2,7 @@ package indexer
 
 import (
 	"github.com/go-ego/riot/types"
-	"github.com/rosbit/go-wget"
+	"github.com/rosbit/gnet"
 	"go-search/conf"
 	"net/http"
 	"strings"
@@ -286,9 +286,9 @@ func (idx *indexer) indexDocs(docs <-chan Doc, cb ...string) (docIds []string) {
 				"index": idx.schema.Name,
 				"docs": count,
 			}
-		}
+		}()
 
-		status, content, _, err := wget.PostJson(cb[0], "POST", params(), nil)
+		status, content, _, err := gnet.JSON(cb[0], gnet.Params(params))
 		if err != nil {
 			log.Printf("failed to send callback to %s: %d\n", cb[0], status)
 		} else {

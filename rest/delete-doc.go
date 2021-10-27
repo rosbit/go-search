@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/rosbit/http-helper"
+	"github.com/rosbit/mgin"
 	"net/http"
 	"go-search/indexer"
 )
@@ -12,7 +12,7 @@ import (
 // {
 // 	  "id": "string"|integer|other-type,
 // }
-func DeleteDoc(c *helper.Context) {
+func DeleteDoc(c *mgin.Context) {
 	index := c.Param("index")
 	var doc struct {
 		Id interface{} `json:"id"`
@@ -39,7 +39,7 @@ func DeleteDoc(c *helper.Context) {
 // [
 // 	  docId1, docId2, ...
 // ]
-func DeleteDocs(c *helper.Context) {
+func DeleteDocs(c *mgin.Context) {
 	index := c.Param("index")
 
 	var docIds []interface{}

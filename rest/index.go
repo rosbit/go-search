@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/rosbit/http-helper"
+	"github.com/rosbit/mgin"
 	"go-search/indexer"
 	"net/http"
 )
@@ -15,7 +15,7 @@ import (
 //   "field-name": "xxx",
 //   ...
 // }
-func IndexDoc(c *helper.Context) {
+func IndexDoc(c *mgin.Context) {
 	updateDoc(c, indexer.IndexDoc, "doc added to index")
 }
 
@@ -28,11 +28,11 @@ func IndexDoc(c *helper.Context) {
 //   "field-name": "xxx",
 //   ...
 // }
-func UpdateDoc(c *helper.Context) {
+func UpdateDoc(c *mgin.Context) {
 	updateDoc(c, indexer.UpdateDoc, "doc updated to index")
 }
 
-func updateDoc(c *helper.Context, fnUpdateDoc indexer.FnUpdateDoc, okStr string) {
+func updateDoc(c *mgin.Context, fnUpdateDoc indexer.FnUpdateDoc, okStr string) {
 	index := c.Param("index")
 
 	var doc map[string]interface{}
@@ -85,7 +85,7 @@ func updateDoc(c *helper.Context, fnUpdateDoc indexer.FnUpdateDoc, okStr string)
 //   POST body:
 //   {json}
 //   {json}
-func IndexDocs(c *helper.Context) {
+func IndexDocs(c *mgin.Context) {
 	index := c.Param("index")
 
 	in, contentType, ext, err := getReader(c, "file")

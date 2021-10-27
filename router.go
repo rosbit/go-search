@@ -5,12 +5,12 @@
 package main
 
 import (
-	"github.com/rosbit/http-helper"
-	"net/http"
-	"fmt"
+	"github.com/rosbit/mgin"
+	"go-search/indexer"
 	"go-search/conf"
 	"go-search/rest"
-	"go-search/indexer"
+	"net/http"
+	"fmt"
 	"os"
 	"log"
 	"os/signal"
@@ -21,7 +21,7 @@ import (
 func StartService() error {
 	initIndexers()
 
-	api := helper.NewHelper()
+	api := mgin.NewMgin(mgin.WithLogger("go-search"))
 
 	api.GET("/schema/:index",    rest.ShowSchema)
 	api.POST("/schema/:index",   rest.CreateSchema)
@@ -35,7 +35,7 @@ func StartService() error {
 	api.GET("/search/:index",    rest.Search)
 
 	// health check
-	api.GET("/health", func(c *helper.Context) {
+	api.GET("/health", func(c *mgin.Context) {
 		c.String(http.StatusOK, "OK\n")
 	})
 

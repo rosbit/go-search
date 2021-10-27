@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/rosbit/http-helper"
+	"github.com/rosbit/mgin"
 	"net/http"
 	"fmt"
 	"go-search/conf"
@@ -22,7 +22,7 @@ import (
 //   - Content-Type: application/json
 //   post body:
 //   {schema-json-content}
-func CreateSchema(c *helper.Context) {
+func CreateSchema(c *mgin.Context) {
 	if !indexer.IsRunning() {
 		c.Error(http.StatusInternalServerError, "service is stopped")
 		return
@@ -57,7 +57,7 @@ func CreateSchema(c *helper.Context) {
 //
 // path parameter
 //  - index  name of index
-func DeleteSchema(c *helper.Context) {
+func DeleteSchema(c *mgin.Context) {
 	index := c.Param("index")
 
 	indexer.RemoveIndexer(index)
@@ -79,7 +79,7 @@ func DeleteSchema(c *helper.Context) {
 //
 // path parameter
 //  - index  name of index
-func ShowSchema(c *helper.Context) {
+func ShowSchema(c *mgin.Context) {
 	index := c.Param("index")
 	if schema, err := conf.LoadSchema(index); err != nil {
 		c.Error(http.StatusInternalServerError, err.Error())
@@ -95,7 +95,7 @@ func ShowSchema(c *helper.Context) {
 // path parameter
 //  - index     name of existing index
 //  - newIndex  new name of the index
-func RenameSchema(c *helper.Context) {
+func RenameSchema(c *mgin.Context) {
 	index := c.Param("index")
 	newIndex := c.Param("newIndex")
 	if _, err := conf.LoadSchema(index); err != nil {
