@@ -1,5 +1,8 @@
 # go-search
 
+【说明】roit已多年未更新，go-search不推荐使用了。推荐使用Rust实现的[meilisearch](https://github.com/meilisearch/MeiliSearch)，
+可以直接下载可执行程序使用。golang版SDK可以使用[meilisearch-sdk](https://github.com/rosbit/meili-search-sdk).
+
 go-search是基于[github.com/go-ego/riot](https://github.com/go-ego/riot)封装而成的搜索服务。
 
 如果把riot类比java的lucene，go-search相当于solr或elasticsearch。go-search提供了比solr、es
